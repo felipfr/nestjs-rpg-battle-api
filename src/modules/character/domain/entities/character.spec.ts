@@ -70,6 +70,143 @@ describe('Character Model', () => {
     })
   })
 
+  describe('create method validations', () => {
+    it('should throw error if id is missing', () => {
+      expect(() =>
+        Character.create({
+          id: '',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: 5, intelligence: 5 },
+          healthPoints: 20,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('Character ID is required')
+    })
+
+    it('should throw error if name is missing', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: '',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: 5, intelligence: 5 },
+          healthPoints: 20,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('Character name is required')
+    })
+
+    it('should throw error if job is invalid', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: 'InvalidJob' as Job,
+          stats: { strength: 10, dexterity: 5, intelligence: 5 },
+          healthPoints: 20,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('Invalid job type: InvalidJob')
+    })
+
+    it('should throw error if maxHealthPoints is not positive', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: 5, intelligence: 5 },
+          healthPoints: 0,
+          maxHealthPoints: 0,
+        }),
+      ).toThrow('maxHealthPoints must be positive')
+    })
+
+    it('should throw error if healthPoints is negative', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: 5, intelligence: 5 },
+          healthPoints: -1,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('healthPoints cannot be negative')
+    })
+
+    it('should throw error if healthPoints exceeds maxHealthPoints', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: 5, intelligence: 5 },
+          healthPoints: 25,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('healthPoints cannot exceed maxHealthPoints')
+    })
+
+    it('should throw error if stats.strength is negative', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: -1, dexterity: 5, intelligence: 5 },
+          healthPoints: 20,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('stats.strength cannot be negative')
+    })
+
+    it('should throw error if stats.dexterity is negative', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: -1, intelligence: 5 },
+          healthPoints: 20,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('stats.dexterity cannot be negative')
+    })
+
+    it('should throw error if stats.intelligence is negative', () => {
+      expect(() =>
+        Character.create({
+          id: '1',
+          name: 'Test',
+          job: Job.Warrior,
+          stats: { strength: 10, dexterity: 5, intelligence: -1 },
+          healthPoints: 20,
+          maxHealthPoints: 20,
+        }),
+      ).toThrow('stats.intelligence cannot be negative')
+    })
+  })
+
+  describe('constructor and immutability', () => {
+    it('should freeze stats to prevent modification', () => {
+      const initialStats = { strength: 10, dexterity: 5, intelligence: 5 }
+      const character = Character.create({
+        id: '1',
+        name: 'Test',
+        job: Job.Warrior,
+        stats: initialStats,
+        healthPoints: 20,
+        maxHealthPoints: 20,
+      })
+      expect(() => {
+        ;(character.stats as any).strength = 15
+      }).toThrow()
+      expect(character.stats).toEqual(initialStats)
+    })
+  })
+
   // Helper functions
   function createCharacter(job: Job, strength: number, dexterity: number, intelligence: number): Character {
     return Character.create({
