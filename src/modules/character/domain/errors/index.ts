@@ -11,3 +11,10 @@ export class CharacterNotFoundError extends Error {
     this.name = 'CharacterNotFoundError'
   }
 }
+
+export class InvalidCursorError extends Error {
+  constructor(cursor: string) {
+    super(`Invalid pagination cursor: '${cursor}'`)
+    this.name = 'InvalidCursorError'
+  }
+}
