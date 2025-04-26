@@ -24,6 +24,12 @@ export class CharacterResponseDto {
   job: string
 
   @ApiProperty({
+    description: 'Indicates whether the character is alive',
+    example: true,
+  })
+  isAlive: boolean
+
+  @ApiProperty({
     description: 'Current health points',
     example: 120,
     minimum: 0,
@@ -38,22 +44,6 @@ export class CharacterResponseDto {
   maxHealthPoints: number
 
   @ApiProperty({
-    description: 'Character stats',
-    example: {
-      strength: 10,
-      dexterity: 5,
-      intelligence: 5,
-    },
-  })
-  stats: { strength: number; dexterity: number; intelligence: number }
-
-  @ApiProperty({
-    description: 'Indicates whether the character is alive',
-    example: true,
-  })
-  isAlive: boolean
-
-  @ApiProperty({
     description: 'Attack modifier calculated for battle',
     example: 18,
     minimum: 0,
@@ -66,6 +56,16 @@ export class CharacterResponseDto {
     minimum: 0,
   })
   speedModifier: number
+
+  @ApiProperty({
+    description: 'Character stats',
+    example: {
+      strength: 10,
+      dexterity: 5,
+      intelligence: 5,
+    },
+  })
+  stats: { strength: number; dexterity: number; intelligence: number }
 
   static fromApplicationDto(dto: CharacterDto): CharacterResponseDto {
     const responseDto = new CharacterResponseDto()
