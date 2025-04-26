@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { CreateCharacterCommandHandler } from './application/commands/create-character/create-character.handler'
 import { GetCharacterByIdQueryHandler } from './application/queries/get-character-by-id/get-character-by-id.handler'
+import { ListCharactersQueryHandler } from './application/queries/list-characters/list-characters.handler'
 import { CharacterCreationService } from './application/services/character-creation.service'
 import { InMemoryCharacterRepository } from './infra/in-memory-character.repository'
 import { CharacterController } from './presentation/character.controller'
@@ -16,14 +17,19 @@ import { CharacterController } from './presentation/character.controller'
       inject: [InMemoryCharacterRepository],
     },
     {
+      provide: CreateCharacterCommandHandler,
+      useFactory: (creationService: CharacterCreationService) => new CreateCharacterCommandHandler(creationService),
+      inject: [CharacterCreationService],
+    },
+    {
       provide: GetCharacterByIdQueryHandler,
       useFactory: (repo: InMemoryCharacterRepository) => new GetCharacterByIdQueryHandler(repo),
       inject: [InMemoryCharacterRepository],
     },
     {
-      provide: CreateCharacterCommandHandler,
-      useFactory: (creationService: CharacterCreationService) => new CreateCharacterCommandHandler(creationService),
-      inject: [CharacterCreationService],
+      provide: ListCharactersQueryHandler,
+      useFactory: (repo: InMemoryCharacterRepository) => new ListCharactersQueryHandler(repo),
+      inject: [InMemoryCharacterRepository],
     },
   ],
 })
