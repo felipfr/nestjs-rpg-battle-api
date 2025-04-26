@@ -1,4 +1,5 @@
-import { CursorPaginationOptions } from '~shared/application/dtos/cursor-pagination.dto'
+import { CursorPaginationOptions, PaginationDirection } from '~shared/application/dtos/cursor-pagination.dto'
+import { CursorPaginationHelper } from '~shared/application/helpers/cursor-pagination.helper'
 import { Character } from '../domain/entities/character'
 import { Job } from '../domain/enums/job.enum'
 import { InMemoryCharacterRepository } from './in-memory-character.repository'
@@ -8,6 +9,7 @@ describe('InMemoryCharacterRepository', () => {
   let characters: Character[]
 
   beforeEach(() => {
+    jest.clearAllMocks()
     repository = new InMemoryCharacterRepository()
     characters = [
       createTestCharacter('1', 'Character1'),
@@ -64,81 +66,55 @@ describe('InMemoryCharacterRepository', () => {
   })
 
   describe('findAll', () => {
+    let mockPaginatedResult: any
+
+    beforeEach(() => {
+      mockPaginatedResult = { data: characters, hasMore: false }
+      jest.spyOn(CursorPaginationHelper, 'paginate').mockReturnValue(mockPaginatedResult)
+    })
+
     it('should return all characters when no options are provided', () => {
       const result = repository.findAll()
-      expect(result.data.length).toBe(5)
-      expect(result.hasMore).toBe(false)
-      expect(result.nextCursor).toBeUndefined()
-      expect(result.previousCursor).toBeUndefined()
+      expect(result).toEqual(mockPaginatedResult)
     })
 
-    it('should return limited number of characters when limit is provided', () => {
-      const options: CursorPaginationOptions = { limit: 2, direction: 'next' }
+    it('should return paginated characters when options are provided', () => {
+      const options: CursorPaginationOptions = { limit: 2, direction: PaginationDirection.NEXT }
       const result = repository.findAll(options)
-      expect(result.data.length).toBe(2)
-      expect(result.data[0].id).toBe('1')
-      expect(result.data[1].id).toBe('2')
-      expect(result.hasMore).toBe(true)
-      expect(result.nextCursor).toBe('2')
-      expect(result.previousCursor).toBe('1')
+      expect(result).toEqual(mockPaginatedResult)
+      expect(CursorPaginationHelper.paginate).toHaveBeenCalledWith(Array.from(characters), options)
     })
 
-    it('should return characters after cursor when direction is "next"', () => {
-      const options: CursorPaginationOptions = { cursor: '2', limit: 2, direction: 'next' }
-      const result = repository.findAll(options)
-      expect(result.data.length).toBe(2)
-      expect(result.data[0].id).toBe('3')
-      expect(result.data[1].id).toBe('4')
-      expect(result.hasMore).toBe(true)
-      expect(result.nextCursor).toBe('4')
-      expect(result.previousCursor).toBe('3')
-    })
-
-    it('should return characters before cursor when direction is "previous"', () => {
-      const options: CursorPaginationOptions = { cursor: '4', limit: 2, direction: 'previous' }
-      const result = repository.findAll(options)
-      expect(result.data.length).toBe(2)
-      expect(result.data[0].id).toBe('2')
-      expect(result.data[1].id).toBe('3')
-      expect(result.hasMore).toBe(true)
-      expect(result.nextCursor).toBe('3')
-      expect(result.previousCursor).toBe('2')
-    })
-
-    it('should correctly handle when cursor is the first item', () => {
-      const options: CursorPaginationOptions = { cursor: '1', limit: 2, direction: 'previous' }
-      const result = repository.findAll(options)
-      expect(result.data.length).toBe(0)
-      expect(result.hasMore).toBe(false)
-      expect(result.nextCursor).toBeUndefined()
-      expect(result.previousCursor).toBeUndefined()
-    })
-
-    it('should correctly handle when cursor is the last item', () => {
-      const options: CursorPaginationOptions = { cursor: '5', limit: 2, direction: 'next' }
-      const result = repository.findAll(options)
-      expect(result.data.length).toBe(0)
-      expect(result.hasMore).toBe(false)
-      expect(result.nextCursor).toBeUndefined()
-      expect(result.previousCursor).toBeUndefined()
-    })
-
-    it('should return empty array when repository is empty', () => {
+    it('should return an empty array when no characters are available', () => {
       const emptyRepository = new InMemoryCharacterRepository()
-      const result = emptyRepository.findAll({ limit: 10, direction: 'next' })
-      expect(result.data).toEqual([])
-      expect(result.hasMore).toBe(false)
-      expect(result.nextCursor).toBeUndefined()
-      expect(result.previousCursor).toBeUndefined()
+      const emptyResult = { data: [], hasMore: false }
+      jest.spyOn(CursorPaginationHelper, 'paginate').mockReturnValue(emptyResult)
+      const result = emptyRepository.findAll()
+      expect(CursorPaginationHelper.paginate).toHaveBeenCalledWith([], undefined)
+      expect(result).toEqual(emptyResult)
     })
 
-    it('should handle invalid cursor by returning from the start', () => {
-      const options: CursorPaginationOptions = { cursor: 'invalid-cursor', limit: 2, direction: 'next' }
+    it('should return paginated characters when options are provided and there are more characters', () => {
+      const options: CursorPaginationOptions = { limit: 2, direction: PaginationDirection.NEXT }
+      const paginatedCharacters = characters.slice(0, 2)
+      const paginatedResult = { data: paginatedCharacters, hasMore: true, nextCursor: '3', previousCursor: undefined }
+      jest.spyOn(CursorPaginationHelper, 'paginate').mockReturnValue(paginatedResult)
       const result = repository.findAll(options)
-      expect(result.data.length).toBe(2)
-      expect(result.data[0].id).toBe('1')
-      expect(result.data[1].id).toBe('2')
-      expect(result.hasMore).toBe(true)
+      expect(result).toEqual(paginatedResult)
+      expect(CursorPaginationHelper.paginate).toHaveBeenCalledWith(Array.from(characters), options)
+    })
+
+    it('should call CursorPaginationHelper.paginate without options when no options are provided', () => {
+      const result = repository.findAll()
+      expect(CursorPaginationHelper.paginate).toHaveBeenCalledWith(Array.from(characters), undefined)
+      expect(result).toBe(mockPaginatedResult)
+    })
+
+    it('should call CursorPaginationHelper.paginate with provided options', () => {
+      const options: CursorPaginationOptions = { limit: 2, direction: PaginationDirection.NEXT }
+      const result = repository.findAll(options)
+      expect(CursorPaginationHelper.paginate).toHaveBeenCalledWith(Array.from(characters), options)
+      expect(result).toBe(mockPaginatedResult)
     })
   })
 })
