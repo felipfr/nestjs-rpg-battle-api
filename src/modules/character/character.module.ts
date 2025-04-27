@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-
+import { CHARACTER_REPOSITORY_TOKEN } from '../shared/domain/interfaces/character-repository.interface'
 import { CreateCharacterCommandHandler } from './application/commands/create-character/create-character.handler'
 import { GetCharacterByIdQueryHandler } from './application/queries/get-character-by-id/get-character-by-id.handler'
 import { ListCharactersQueryHandler } from './application/queries/list-characters/list-characters.handler'
@@ -31,6 +31,11 @@ import { CharacterController } from './presentation/character.controller'
       useFactory: (repo: InMemoryCharacterRepository) => new ListCharactersQueryHandler(repo),
       inject: [InMemoryCharacterRepository],
     },
+    {
+      provide: CHARACTER_REPOSITORY_TOKEN,
+      useExisting: InMemoryCharacterRepository,
+    },
   ],
+  exports: [CHARACTER_REPOSITORY_TOKEN],
 })
 export class CharacterModule {}
