@@ -1,5 +1,5 @@
 import { CharacterDto } from '~character/application/dto/character.dto'
-import { CharacterNotFoundError } from '~character/domain/errors'
+import { CharacterNotFoundError } from '~shared/domain/errors/character-not-found.error'
 import { CharacterRepositoryInterface } from '~shared/domain/interfaces/character-repository.interface'
 import type { GetCharacterByIdQuery } from './get-character-by-id.query'
 
