@@ -1,7 +1,7 @@
 {
   "name": "nestjs-rpg-battle-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Proof of concept REST API for managing RPG characters and battles.",
   "author": {
     "name": "felipfr"
   },
@@ -18,8 +18,6 @@
     "start:dev": "nest start --watch",
     "test": "jest --cache --maxWorkers=50% --logHeapUsage",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:watch": "jest --watch"
   },
   "dependencies": {
