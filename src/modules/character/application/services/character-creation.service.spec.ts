@@ -1,7 +1,7 @@
 import { Job } from '~character/domain/enums/job.enum'
 import { CharacterRepositoryInterface } from '~shared/domain/interfaces/character-repository.interface'
 import { Character } from '../../domain/entities/character'
-import { DuplicateCharacterNameError } from '../../domain/errors'
+import { DuplicateCharacterNameError } from '../../domain/errors/duplicate-character-name.error'
 import { CharacterCreationService } from './character-creation.service'
 
 describe('CharacterCreationService', () => {
