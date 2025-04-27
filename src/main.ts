@@ -1,6 +1,7 @@
 import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import { HttpExceptionFilter } from '~shared/application/filters/http-exception.filter'
 import { buildCorsOptions, setupSwagger } from '~shared/config'
 import { AppModule } from './app.module'
 
@@ -8,7 +9,8 @@ async function bootstrap() {
   const logger = new Logger('RPG Battle API')
   const fastifyAdapter = new FastifyAdapter()
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter)
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
+  app.useGlobalFilters(new HttpExceptionFilter())
   app.enableCors(buildCorsOptions())
   setupSwagger(app)
   const globalPrefix = process.env.API_PREFIX ?? '/api/v1'
