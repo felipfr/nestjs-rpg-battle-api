@@ -1,6 +1,6 @@
 import { ListCharacterDto } from '~character/application/dto/list-character.dto'
-import { InvalidCursorError } from '~character/domain/errors'
 import type { PaginatedResult } from '~shared/application/dtos/cursor-pagination.dto'
+import { InvalidCursorError } from '~shared/application/errors/invalid-cursor.error'
 import type { CharacterRepositoryInterface } from '~shared/domain/interfaces/character-repository.interface'
 import { ListCharactersQuery } from './list-characters.query'
 
