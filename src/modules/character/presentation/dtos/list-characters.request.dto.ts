@@ -34,3 +34,4 @@ export class ListCharactersRequestDto {
   @IsEnum(PaginationDirection)
   direction: PaginationDirection.NEXT | PaginationDirection.PREVIOUS = PaginationDirection.NEXT
 }
+
