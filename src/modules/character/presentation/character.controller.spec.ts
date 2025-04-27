@@ -7,9 +7,13 @@ import { GetCharacterByIdQueryHandler } from '~character/application/queries/get
 import { ListCharactersQueryHandler } from '~character/application/queries/list-characters/list-characters.handler'
 import { Job } from '~character/domain/enums/job.enum'
 import { Stats } from '~character/domain/value-objects/stats.vo'
+import { InvalidCursorError } from '~shared/application/errors/invalid-cursor.error'
+import { CharacterNotFoundError } from '~shared/domain/errors/character-not-found.error'
 import { CharacterDto } from '../application/dto/character.dto'
-import { CharacterNotFoundError, DuplicateCharacterNameError, InvalidCursorError } from '../domain/errors'
+import { DuplicateCharacterNameError } from '../domain/errors/duplicate-character-name.error'
 import { CharacterController } from './character.controller'
+import { HttpExceptionFilter } from '~shared/application/filters/http-exception.filter'
+import { APP_FILTER } from '@nestjs/core'
 
 describe('CharacterController (Integration)', () => {
   let app: INestApplication
@@ -29,6 +33,7 @@ describe('CharacterController (Integration)', () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [CharacterController],
       providers: [
+        { provide: APP_FILTER, useClass: HttpExceptionFilter },
         { provide: CreateCharacterCommandHandler, useValue: mockCreateCharacterHandler },
         { provide: GetCharacterByIdQueryHandler, useValue: mockGetCharacterByIdHandler },
         { provide: ListCharactersQueryHandler, useValue: mockListCharactersHandler },
@@ -36,7 +41,7 @@ describe('CharacterController (Integration)', () => {
     }).compile()
 
     app = moduleRef.createNestApplication()
-    app.useGlobalPipes(new ValidationPipe({ transform: true }))
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
     await app.init()
   })
 
