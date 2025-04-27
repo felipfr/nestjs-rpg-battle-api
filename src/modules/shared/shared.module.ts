@@ -4,8 +4,11 @@ import { HttpExceptionFilter } from './application/filters/http-exception.filter
 
 @Module({
   providers: [
-    { provide: APP_PIPE, useClass: ValidationPipe },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
+    {
+      provide: APP_PIPE,
+      useFactory: () => new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    },
   ],
   exports: [],
 })
