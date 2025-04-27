@@ -1,7 +1,7 @@
 import { CharacterDto } from '~character/application/dto/character.dto'
 import { Character } from '~character/domain/entities/character'
 import { Job } from '~character/domain/enums/job.enum'
-import { CharacterNotFoundError } from '~character/domain/errors'
+import { CharacterNotFoundError } from '~shared/domain/errors/character-not-found.error'
 import { CharacterRepositoryInterface } from '~shared/domain/interfaces/character-repository.interface'
 import { GetCharacterByIdQueryHandler } from './get-character-by-id.handler'
 import { GetCharacterByIdQuery } from './get-character-by-id.query'
