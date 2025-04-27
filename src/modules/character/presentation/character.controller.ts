@@ -1,31 +1,17 @@
-import {
-  BadRequestException,
-  Body,
-  ConflictException,
-  Controller,
-  Get,
-  HttpCode,
-  NotFoundException,
-  Param,
-  Post,
-  Query,
-  ValidationPipe,
-} from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, Post, Query, ValidationPipe } from '@nestjs/common'
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { CreateCharacterCommand } from '~character/application/commands/create-character/create-character.command'
 import { CreateCharacterCommandHandler } from '~character/application/commands/create-character/create-character.handler'
-import { ListCharacterDto } from '~character/application/dto/list-character.dto'
 import { GetCharacterByIdQueryHandler } from '~character/application/queries/get-character-by-id/get-character-by-id.handler'
 import { GetCharacterByIdQuery } from '~character/application/queries/get-character-by-id/get-character-by-id.query'
 import { ListCharactersQueryHandler } from '~character/application/queries/list-characters/list-characters.handler'
 import { ListCharactersQuery } from '~character/application/queries/list-characters/list-characters.query'
-import type { PaginatedResult } from '~shared/application/dtos/cursor-pagination.dto'
-import { CharacterNotFoundError, DuplicateCharacterNameError, InvalidCursorError } from '../domain/errors'
 import { CharacterIdRequestDto } from './dtos/character-id.request.dto'
 import { CharacterResponseDto } from './dtos/character.response.dto'
 import { CreateCharacterRequestDto } from './dtos/create-character.request.dto'
 import { ListCharactersRequestDto } from './dtos/list-characters.request.dto'
+import { PaginatedCharacterResponseDto } from './dtos/list-characters.response.dto'
 
 @ApiTags('characters')
 @Controller('characters')
@@ -38,10 +24,10 @@ export class CharacterController {
 
   @Get()
   @ApiOperation({ summary: 'List all characters with pagination' })
-  @ApiOperation({ summary: 'List all characters with pagination' })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of characters',
+    type: PaginatedCharacterResponseDto,
     content: {
       'application/json': {
         examples: {
@@ -111,14 +97,10 @@ export class CharacterController {
   })
   listCharacters(
     @Query(new ValidationPipe({ transform: true, whitelist: true })) query: ListCharactersRequestDto,
-  ): PaginatedResult<ListCharacterDto> {
-    try {
-      const listQuery = new ListCharactersQuery(query)
-      return this.listCharactersHandler.execute(listQuery)
-    } catch (error) {
-      if (error instanceof InvalidCursorError) throw new BadRequestException(error.message)
-      throw error
-    }
+  ): PaginatedCharacterResponseDto {
+    const listQuery = new ListCharactersQuery(query)
+    const paginatedResult = this.listCharactersHandler.execute(listQuery)
+    return PaginatedCharacterResponseDto.fromApplicationDto(paginatedResult)
   }
 
   @Get(':id')
@@ -153,23 +135,14 @@ export class CharacterController {
     description: 'Character not found',
     content: {
       'application/json': {
-        example: {
-          statusCode: 404,
-          message: "Character with id 'uuid-example' not found",
-          error: 'Not Found',
-        },
+        example: { statusCode: 404, message: "Character with id 'uuid-example' not found", error: 'Not Found' },
       },
     },
   })
   getCharacterById(@Param(new ValidationPipe()) params: CharacterIdRequestDto): CharacterResponseDto {
-    try {
-      const query = new GetCharacterByIdQuery(params.id)
-      const characterDto = this.getCharacterByIdHandler.execute(query)
-      return CharacterResponseDto.fromApplicationDto(characterDto)
-    } catch (error) {
-      if (error instanceof CharacterNotFoundError) throw new NotFoundException(error.message)
-      throw error
-    }
+    const query = new GetCharacterByIdQuery(params.id)
+    const characterDto = this.getCharacterByIdHandler.execute(query)
+    return CharacterResponseDto.fromApplicationDto(characterDto)
   }
 
   @Post()
@@ -270,13 +243,8 @@ export class CharacterController {
     },
   })
   createCharacter(@Body() dto: CreateCharacterRequestDto): CharacterResponseDto {
-    try {
-      const command = new CreateCharacterCommand(dto.name, dto.job)
-      const characterDto = this.createCharacterHandler.execute(command)
-      return CharacterResponseDto.fromApplicationDto(characterDto)
-    } catch (error) {
-      if (error instanceof DuplicateCharacterNameError) throw new ConflictException(error.message)
-      throw error
-    }
+    const command = new CreateCharacterCommand(dto.name, dto.job)
+    const characterDto = this.createCharacterHandler.execute(command)
+    return CharacterResponseDto.fromApplicationDto(characterDto)
   }
 }
