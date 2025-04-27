@@ -1,16 +1,15 @@
 import { randomUUID } from 'crypto'
 
 /**
- * Note: We're calling a crypto library directly in this application layer because we're
- * simulating an ID generation that would typically be handled by a database.
- * In a real-world scenario with a database, the ID generation would be delegated to
- * the infrastructure layer or handled by the database itself.
+ * Using randomUUID in the application layer is not ideal - in a proper architecture,
+ * ID generation should be handled by the repository/infrastructure layer.
+ * This is kept here for simplicity in this proof of concept implementation.
  */
 
 import { Job } from '~character/domain/enums/job.enum'
 import { CharacterRepositoryInterface } from '~shared/domain/interfaces/character-repository.interface'
 import { Character } from '../../domain/entities/character'
-import { DuplicateCharacterNameError } from '../../domain/errors'
+import { DuplicateCharacterNameError } from '../../domain/errors/duplicate-character-name.error'
 
 export class CharacterCreationService {
   private readonly JOB_BASE_STATS: Record<
