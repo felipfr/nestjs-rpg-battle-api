@@ -89,7 +89,7 @@ The API will be available at `http://localhost:3000/api/v1` (or the port/prefix 
 
 Once the application is running, access the Swagger UI for interactive API documentation at:
 
-`http://localhost:3000/api/v1/docs`
+`http://localhost:3000/docs`
 
 ## Testing
 
